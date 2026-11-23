@@ -19,8 +19,13 @@ export async function apiFetch(endpoint, options = {}) {
 
   if (response.status === 401) {
     localStorage.removeItem('user_jwt_token');
-    window.location.href = '/login';
-    throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+    localStorage.removeItem('user_data');
+
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+
+    throw new Error('Tu sesión expiró. Inicia sesión nuevamente.');
   }
 
   if (response.status === 403) {
@@ -28,7 +33,10 @@ export async function apiFetch(endpoint, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(`Error en la solicitud: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Error en la solicitud: ${response.status}`
+    );
   }
 
   if (response.status === 204) {

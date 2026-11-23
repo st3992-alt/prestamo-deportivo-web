@@ -1,36 +1,75 @@
 
-import { Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from 'react-router-dom';
 
-function Login() {
-  return <h1>Inicio de sesión</h1>;
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+import Layout from './components/Layout';
+import Login from './pages/Login';
+import Registro from './pages/Registro';
+import Inventario from './pages/Inventario';
+import MisPrestamos from './pages/MisPrestamos';
+import Admin from './pages/Admin';
+
+function ProtectedRoute({ adminOnly = false }) {
+  const { user } = useAuth();
+  const token = localStorage.getItem('user_jwt_token');
+
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (adminOnly && user.rol !== 'ADMIN') {
+    return <Navigate to="/inventario" replace />;
+  }
+
+  return <Outlet />;
 }
 
-function Registro() {
-  return <h1>Registro de usuario</h1>;
-}
+function AppRoutes() {
+  const { user } = useAuth();
 
-function Inventario() {
-  return <h1>Inventario deportivo</h1>;
-}
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={user ? <Navigate to="/inventario" replace /> : <Login />}
+      />
 
-function MisPrestamos() {
-  return <h1>Mis préstamos</h1>;
-}
+      <Route
+        path="/registro"
+        element={<Registro />}
+      />
 
-function Admin() {
-  return <h1>Panel de administración</h1>;
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/inventario" element={<Inventario />} />
+          <Route path="/mis-prestamos" element={<MisPrestamos />} />
+
+          <Route element={<ProtectedRoute adminOnly />}>
+            <Route path="/admin" element={<Admin />} />
+          </Route>
+        </Route>
+      </Route>
+
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/registro" element={<Registro />} />
-      <Route path="/inventario" element={<Inventario />} />
-      <Route path="/mis-prestamos" element={<MisPrestamos />} />
-      <Route path="/admin" element={<Admin />} />
-    </Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
