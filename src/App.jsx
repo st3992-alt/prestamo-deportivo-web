@@ -33,12 +33,18 @@ function ProtectedRoute({ adminOnly = false }) {
 
 function AppRoutes() {
   const { user } = useAuth();
+  const token = localStorage.getItem('user_jwt_token');
+  const authenticated = Boolean(token && user);
 
   return (
     <Routes>
       <Route
         path="/login"
-        element={user ? <Navigate to="/inventario" replace /> : <Login />}
+        element={
+          authenticated
+            ? <Navigate to={user.rol === 'ADMIN' ? '/admin' : '/inventario'} replace />
+            : <Login />
+        }
       />
 
       <Route
@@ -57,8 +63,15 @@ function AppRoutes() {
         </Route>
       </Route>
 
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="/"
+        element={<Navigate to={authenticated ? '/inventario' : '/login'} replace />}
+      />
+
+      <Route
+        path="*"
+        element={<Navigate to={authenticated ? '/inventario' : '/login'} replace />}
+      />
     </Routes>
   );
 }

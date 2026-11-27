@@ -6,7 +6,7 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 
 function Login() {
-  const [matricula, setMatricula] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ function Login() {
     event.preventDefault();
     setError('');
 
-    if (!matricula.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim()) {
       setError('Completa todos los campos.');
       return;
     }
@@ -27,7 +27,7 @@ function Login() {
       setLoading(true);
 
       const loggedUser = await login({
-        matricula,
+        email,
         password,
       });
 
@@ -50,11 +50,12 @@ function Login() {
         {error && <p className="error-message">{error}</p>}
 
         <Input
-          label="Matrícula"
-          name="matricula"
-          value={matricula}
-          onChange={(e) => setMatricula(e.target.value)}
-          placeholder="Ingresa tu matrícula"
+          label="Correo electrónico"
+          name="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Ingresa tu correo electrónico"
         />
 
         <Input

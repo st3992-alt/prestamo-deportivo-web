@@ -7,11 +7,12 @@ import Button from '../components/Button';
 
 function Registro() {
   const [form, setForm] = useState({
-    nombre: '',
-    matricula: '',
-    email: '',
-    password: '',
-  });
+  nombre: '',
+  matricula: '',
+  email: '',
+  password: '',
+  confirmarPassword: '',
+});
 
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -38,11 +39,20 @@ function Registro() {
       setError('Todos los campos son obligatorios.');
       return;
     }
+    if (form.password !== form.confirmarPassword) {
+      setError('Las contraseñas no coinciden.');
+      return;
+    }
 
     try {
       setLoading(true);
 
-      await register(form);
+      const { confirmarPassword, ...datosRegistro } = form;
+
+        await register({
+          ...datosRegistro,
+          rol: 'USER',
+        });
 
       setMessage('Registro realizado. Ya puedes iniciar sesión.');
 
@@ -95,6 +105,15 @@ function Registro() {
           value={form.password}
           onChange={handleChange}
           placeholder="Crea una contraseña"
+        />
+
+        <Input
+          label="Confirmar contraseña"
+          name="confirmarPassword"
+          type="password"
+          value={form.confirmarPassword}
+          onChange={handleChange}
+          placeholder="Repite tu contraseña"
         />
 
         <Button type="submit" disabled={loading}>

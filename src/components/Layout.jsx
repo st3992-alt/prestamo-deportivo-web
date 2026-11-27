@@ -18,17 +18,29 @@ function Layout() {
         <h2>Préstamo Deportivo</h2>
 
         <nav>
-          <NavLink to="/inventario">Inventario</NavLink>
-          <NavLink to="/mis-prestamos">Mis préstamos</NavLink>
+          <NavLink to="/inventario">
+            Inventario
+          </NavLink>
+
+          <NavLink to="/mis-prestamos">
+            Mis préstamos
+          </NavLink>
 
           {user?.rol === 'ADMIN' && (
-            <NavLink to="/admin">Administración</NavLink>
+            <NavLink to="/admin">
+              Administración
+            </NavLink>
           )}
         </nav>
 
         <div className="navbar-user">
-          <span>{user?.nombre || user?.matricula}</span>
-          <button onClick={handleLogout}>Cerrar sesión</button>
+          <span>
+            {user?.nombre || user?.email || user?.matricula}
+          </span>
+
+          <button onClick={handleLogout}>
+            Cerrar sesión
+          </button>
         </div>
       </header>
 

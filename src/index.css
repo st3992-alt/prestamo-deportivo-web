@@ -160,3 +160,80 @@ td select {
     margin-top: 22px;
   }
 }
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.filters-container select {
+  padding: 10px;
+  min-width: 180px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background-color: white;
+  color: #1e293b;
+}
+
+.loan-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.loan-modal {
+  width: 100%;
+  max-width: 450px;
+  padding: 28px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.loan-modal h2 {
+  margin-top: 0;
+  color: #172554;
+}
+
+.loan-modal label {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 7px;
+  font-weight: bold;
+}
+
+.loan-modal input {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+}
+
+.loan-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.cancel-button {
+  padding: 11px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: white;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.loan-modal button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

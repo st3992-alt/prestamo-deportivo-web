@@ -1,12 +1,14 @@
 
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function MisPrestamos() {
   const [loans, setLoans] = useState([]);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
 
   async function cargarPrestamos() {
     try {
@@ -15,7 +17,15 @@ function MisPrestamos() {
 
       const response = await apiFetch('/api/sports/loans');
 
-      setLoans(Array.isArray(response) ? response : response.loans || []);
+      const todosLosPrestamos = Array.isArray(response)
+        ? response
+        : response.loans || [];
+
+      const prestamosUsuario = todosLosPrestamos.filter(
+        (loan) => Number(loan.userId) === Number(user.id)
+      );
+
+      setLoans(prestamosUsuario);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -23,75 +33,74 @@ function MisPrestamos() {
     }
   }
 
-  async function devolverPrestamo(id) {
-    try {
-      setError('');
-      setMessage('');
-
-      await apiFetch(`/api/sports/loans/${id}/return`, {
-        method: 'PATCH',
-      });
-
-      setMessage('Devolución registrada correctamente.');
-      await cargarPrestamos();
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
   useEffect(() => {
     cargarPrestamos();
   }, []);
 
+  function formatearFecha(fecha) {
+    if (!fecha) return 'No disponible';
+
+    return new Date(fecha).toLocaleString('es-MX', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  }
+
+  const prestamosActivos = loans.filter(
+    (loan) => loan.estatus === 'ACTIVO'
+  );
+
+  const prestamosFinalizados = loans.filter(
+    (loan) => loan.estatus === 'FINALIZADO'
+  );
+
+  function mostrarPrestamo(loan) {
+    return (
+      <article className="data-card" key={loan.loanId}>
+        <h3>{loan.item}</h3>
+
+        <p><strong>Código:</strong> {loan.codigo}</p>
+        <p><strong>Deporte:</strong> {loan.deporte}</p>
+        <p><strong>Cantidad:</strong> {loan.cantidad}</p>
+        <p><strong>Cancha o actividad:</strong> {loan.canchaOActividad}</p>
+        <p><strong>Hora de salida:</strong> {formatearFecha(loan.horaSalida)}</p>
+        <p><strong>Hora de devolución:</strong> {formatearFecha(loan.horaDevolucion)}</p>
+        <p>
+          <strong>Estado:</strong>{' '}
+          {loan.estatus === 'ACTIVO' ? 'Activo' : 'Finalizado'}
+        </p>
+      </article>
+    );
+  }
+
   if (loading) return <p>Cargando préstamos...</p>;
 
   return (
-    <section>
+    <section className="page-content">
       <h1>Mis préstamos</h1>
-      <p>Consulta el estado de tus solicitudes y préstamos.</p>
+      <p>Consulta tus préstamos activos y el historial de devoluciones.</p>
 
       {error && <p className="error-message">{error}</p>}
-      {message && <p className="success-message">{message}</p>}
+
+      <h2>Préstamos activos</h2>
 
       <div className="cards-grid">
-        {loans.map((loan) => {
-          const id = loan._id || loan.id;
-          const estado = loan.estado || loan.status;
-
-          return (
-            <article className="data-card" key={id}>
-              <h3>
-                {loan.item?.nombre ||
-                  loan.item?.name ||
-                  loan.nombreMaterial ||
-                  'Préstamo'}
-              </h3>
-
-              <p>Estado: {estado || 'No especificado'}</p>
-
-              <p>
-                Fecha de solicitud:{' '}
-                {loan.fechaSolicitud
-                  ? new Date(loan.fechaSolicitud).toLocaleDateString()
-                  : loan.createdAt
-                    ? new Date(loan.createdAt).toLocaleDateString()
-                    : 'No disponible'}
-              </p>
-
-              {estado === 'APROBADO' && (
-                <button
-                  className="action-button"
-                  onClick={() => devolverPrestamo(id)}
-                >
-                  Registrar devolución
-                </button>
-              )}
-            </article>
-          );
-        })}
+        {prestamosActivos.map(mostrarPrestamo)}
       </div>
 
-      {loans.length === 0 && <p>No tienes préstamos registrados.</p>}
+      {prestamosActivos.length === 0 && (
+        <p>No tienes préstamos activos.</p>
+      )}
+
+      <h2>Historial de préstamos</h2>
+
+      <div className="cards-grid">
+        {prestamosFinalizados.map(mostrarPrestamo)}
+      </div>
+
+      {prestamosFinalizados.length === 0 && (
+        <p>Aún no tienes préstamos finalizados.</p>
+      )}
     </section>
   );
 }
